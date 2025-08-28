@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Night Sky</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      height: 100vh;
+      background: radial-gradient(circle at bottom, #0b1a2d, #000);
+      overflow: hidden;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Moon */
+    .moon {
+      position: absolute;
+      top: 80px;
+      right: 120px;
+      width: 120px;
+      height: 120px;
+      background: radial-gradient(circle at 30% 30%, #fefcea, #d9d9d9 70%);
+      border-radius: 50%;
+      box-shadow: 0 0 40px rgba(255, 255, 200, 0.7);
+    }
+
+    /* Stars */
+    .star {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      opacity: 0.8;
+      animation: twinkle 2s infinite ease-in-out alternate;
+    }
+
+    @keyframes twinkle {
+      from { opacity: 0.2; }
+      to { opacity: 1; }
+    }
+
+    /* Text */
+    .content {
+      position: absolute;
+      bottom: 50px;
+      width: 100%;
+      text-align: center;
+      font-size: 1.5rem;
+      letter-spacing: 2px;
+    }
+  </style>
+
+  <script>
+  window.watsonAssistantChatOptions = {
+    integrationID: "e657cb1b-57aa-4af4-b1ac-1bb795cc0945", // The ID of this integration.
+    region: "us-east", // The region your integration is hosted in.
+    serviceInstanceID: "3b24136b-92df-4f6d-9d87-4457fd32d33a", // The ID of your service instance.
+    onLoad: async (instance) => { await instance.render(); }
+  };
+  setTimeout(function(){
+    const t=document.createElement('script');
+    t.src="https://web-chat.global.assistant.watson.appdomain.cloud/versions/" + (window.watsonAssistantChatOptions.clientVersion || 'latest') + "/WatsonAssistantChatEntry.js";
+    document.head.appendChild(t);
+  });
+  </script>
+</head>
+<body>
+  <div class="moon"></div>
+  <div class="content">
+    <h1>Welcome to My Night Sky ✨</h1>
+    <p>A calm place under the stars...</p>
+  </div>
+
+  <script>
+    // Generate stars randomly
+    const numStars = 100; // number of stars
+    for (let i = 0; i < numStars; i++) {
+      const star = document.createElement("div");
+      star.classList.add("star");
+
+      // Random position
+      star.style.top = Math.random() * 100 + "%";
+      star.style.left = Math.random() * 100 + "%";
+
+      // Random size (1px–4px)
+      const size = Math.random() * 3 + 1;
+      star.style.width = size + "px";
+      star.style.height = size + "px";
+
+      // Random twinkle delay
+      star.style.animationDelay = (Math.random() * 2) + "s";
+
+      document.body.appendChild(star);
+    }
+  </script>
+</body>
+</html>
