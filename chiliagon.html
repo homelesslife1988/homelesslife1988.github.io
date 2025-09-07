@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Chiliagon Viewer</title>
+  <style>
+    body, html { margin: 0; height: 100%; overflow: hidden; }
+    canvas { display: block; background: #111; }
+  </style>
+</head>
+<body>
+<canvas id="chiliagonCanvas"></canvas>
+
+<script>
+const canvas = document.getElementById('chiliagonCanvas');
+const ctx = canvas.getContext('2d');
+
+let width = window.innerWidth;
+let height = window.innerHeight;
+canvas.width = width;
+canvas.height = height;
+
+let zoom = 1;
+let offsetX = width / 2;
+let offsetY = height / 2;
+
+// Recalculate size on resize
+window.addEventListener('resize', () => {
+  width = window.innerWidth;
+  height = window.innerHeight;
+  canvas.width = width;
+  canvas.height = height;
+  draw();
+});
+
+// Zoom on wheel
+canvas.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const delta = -e.deltaY * 0.001;
+  zoom *= (1 + delta);
+  draw();
+});
+
+function drawChiliagon(centerX, centerY, radius, sides) {
+  ctx.beginPath();
+  for (let i = 0; i <= sides; i++) {
+    const angle = (i / sides) * 2 * Math.PI;
+    const x = centerX + radius * Math.cos(angle);
+    const y = centerY + radius * Math.sin(angle);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.strokeStyle = '#00ff88';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+}
+
+function draw() {
+  ctx.clearRect(0, 0, width, height);
+  ctx.save();
+  ctx.translate(offsetX, offsetY);
+  ctx.scale(zoom, zoom);
+  drawChiliagon(0, 0, 200, 1000);
+  ctx.restore();
+}
+
+draw();
+</script>
+</body>
+</html>
