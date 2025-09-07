@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Game of Life</title>
+  <style>
+    html, body {
+      margin: 0;
+      background: #111;
+      overflow: hidden;
+      font-family: sans-serif;
+      color: white;
+    }
+    canvas {
+      display: block;
+      background: #222;
+    }
+    #controls {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 10;
+      background: rgba(0,0,0,0.7);
+      padding: 8px 12px;
+      border-radius: 6px;
+    }
+    button {
+      font-size: 14px;
+      padding: 4px 8px;
+    }
+  </style>
+</head>
+<body>
+<div id="controls">
+  <button id="toggleBtn">Start</button>
+  <button id="clearBtn">Clear</button>
+</div>
+<canvas id="gameCanvas"></canvas>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+let width = window.innerWidth;
+let height = window.innerHeight;
+canvas.width = width;
+canvas.height = height;
+
+// Configuration
+const CELL_SIZE = 10;
+const COLS = Math.floor(width / CELL_SIZE);
+const ROWS = Math.floor(height / CELL_SIZE);
+
+// Create 2D grid
+let grid = createGrid();
+let running = false;
+let intervalId = null;
+
+function createGrid() {
+  return new Array(ROWS).fill(null).map(() =>
+    new Array(COLS).fill(0)
+  );
+}
+
+// Toggle cell state on click
+canvas.addEventListener('click', (e) => {
+  const rect = canvas.getBoundingClientRect();
+  const x = Math.floor((e.clientX - rect.left) / CELL_SIZE);
+  const y = Math.floor((e.clientY - rect.top) / CELL_SIZE);
+  grid[y][x] = grid[y][x] ? 0 : 1;
+  draw();
+});
+
+// Control buttons
+document.getElementById('toggleBtn').addEventListener('click', () => {
+  running = !running;
+  document.getElementById('toggleBtn').textContent = running ? 'Pause' : 'Start';
+  if (running) {
+    intervalId = setInterval(step, 100);
+  } else {
+    clearInterval(intervalId);
+  }
+});
+
+document.getElementById('clearBtn').addEventListener('click', () => {
+  grid = createGrid();
+  draw();
+});
+
+// Simulation step
+function step() {
+  const next = createGrid();
+
+  for (let y = 0; y < ROWS; y++) {
+    for (let x = 0; x < COLS; x++) {
+      const neighbors = countNeighbors(x, y);
+      const alive = grid[y][x];
+
+      if (alive && (neighbors === 2 || neighbors === 3)) {
+        next[y][x] = 1;
+      } else if (!alive && neighbors === 3) {
+        next[y][x] = 1;
+      } else {
+        next[y][x] = 0;
+      }
+    }
+  }
+
+  grid = next;
+  draw();
+}
+
+// Count live neighbors
+function countNeighbors(x, y) {
+  let sum = 0;
+  for (let dy = -1; dy <= 1; dy++) {
+    for (let dx = -1; dx <= 1; dx++) {
+      if (dx === 0 && dy === 0) continue;
+
+      const nx = x + dx;
+      const ny = y + dy;
+      if (nx >= 0 && nx < COLS && ny >= 0 && ny < ROWS) {
+        sum += grid[ny][nx];
+      }
+    }
+  }
+  return sum;
+}
+
+// Draw the grid
+function draw() {
+  ctx.clearRect(0, 0, width, height);
+  for (let y = 0; y < ROWS; y++) {
+    for (let x = 0; x < COLS; x++) {
+      if (grid[y][x]) {
+        ctx.fillStyle = '#00ff88';
+        ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+      }
+    }
+  }
+}
+
+draw();
+</script>
+</body>
+</html>
