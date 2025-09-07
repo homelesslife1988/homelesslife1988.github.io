@@ -4,8 +4,19 @@
   <meta charset="UTF-8" />
   <title>Chiliagon Viewer</title>
   <style>
-    body, html { margin: 0; height: 100%; overflow: hidden; }
-    canvas { display: block; background: #111; }
+    html, body {
+      margin: 0;
+      overflow: hidden;
+      height: 100%;
+    }
+    canvas {
+      display: block;
+      background: #111;
+      cursor: grab;
+    }
+    canvas:active {
+      cursor: grabbing;
+    }
   </style>
 </head>
 <body>
@@ -24,7 +35,10 @@ let zoom = 1;
 let offsetX = width / 2;
 let offsetY = height / 2;
 
-// Recalculate size on resize
+let isDragging = false;
+let dragStart = { x: 0, y: 0 };
+let viewOffsetStart = { x: 0, y: 0 };
+
 window.addEventListener('resize', () => {
   width = window.innerWidth;
   height = window.innerHeight;
@@ -33,25 +47,69 @@ window.addEventListener('resize', () => {
   draw();
 });
 
-// Zoom on wheel
+// Mouse wheel for zooming
 canvas.addEventListener('wheel', (e) => {
   e.preventDefault();
-  const delta = -e.deltaY * 0.001;
-  zoom *= (1 + delta);
+  const zoomFactor = 1.1;
+  const mouseX = e.offsetX;
+  const mouseY = e.offsetY;
+
+  // Convert mouse position to world coordinates
+  const wx = (mouseX - offsetX) / zoom;
+  const wy = (mouseY - offsetY) / zoom;
+
+  if (e.deltaY < 0) {
+    zoom *= zoomFactor;
+  } else {
+    zoom /= zoomFactor;
+  }
+
+  // Adjust offset so zoom is centered around mouse position
+  offsetX = mouseX - wx * zoom;
+  offsetY = mouseY - wy * zoom;
+
   draw();
 });
 
+// Drag to pan
+canvas.addEventListener('mousedown', (e) => {
+  isDragging = true;
+  dragStart.x = e.clientX;
+  dragStart.y = e.clientY;
+  viewOffsetStart.x = offsetX;
+  viewOffsetStart.y = offsetY;
+});
+
+canvas.addEventListener('mousemove', (e) => {
+  if (isDragging) {
+    const dx = e.clientX - dragStart.x;
+    const dy = e.clientY - dragStart.y;
+    offsetX = viewOffsetStart.x + dx;
+    offsetY = viewOffsetStart.y + dy;
+    draw();
+  }
+});
+
+canvas.addEventListener('mouseup', () => {
+  isDragging = false;
+});
+canvas.addEventListener('mouseleave', () => {
+  isDragging = false;
+});
+
+// Draw the chiliagon
 function drawChiliagon(centerX, centerY, radius, sides) {
   ctx.beginPath();
   for (let i = 0; i <= sides; i++) {
     const angle = (i / sides) * 2 * Math.PI;
     const x = centerX + radius * Math.cos(angle);
     const y = centerY + radius * Math.sin(angle);
-    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
   }
   ctx.closePath();
   ctx.strokeStyle = '#00ff88';
-  ctx.lineWidth = 1;
+  ctx.lineWidth = 1 / zoom; // Keep line width consistent across zoom levels
   ctx.stroke();
 }
 
