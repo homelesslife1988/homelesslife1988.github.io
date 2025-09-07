@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Chiliagon Viewer</title>
+  <title>Polygon Viewer</title>
   <style>
     html, body {
       margin: 0;
@@ -17,14 +17,36 @@
     canvas:active {
       cursor: grabbing;
     }
+    #controls {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 10;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-family: sans-serif;
+      color: white;
+    }
+    #controls input {
+      width: 80px;
+      font-size: 16px;
+      padding: 4px;
+      margin-left: 8px;
+    }
   </style>
 </head>
 <body>
+<div id="controls">
+  Sides:
+  <input type="number" id="sidesInput" min="3" max="10000" value="1000">
+</div>
 <canvas id="chiliagonCanvas"></canvas>
 
 <script>
 const canvas = document.getElementById('chiliagonCanvas');
 const ctx = canvas.getContext('2d');
+const input = document.getElementById('sidesInput');
 
 let width = window.innerWidth;
 let height = window.innerHeight;
@@ -39,6 +61,8 @@ let isDragging = false;
 let dragStart = { x: 0, y: 0 };
 let viewOffsetStart = { x: 0, y: 0 };
 
+let sides = parseInt(input.value) || 1000;
+
 window.addEventListener('resize', () => {
   width = window.innerWidth;
   height = window.innerHeight;
@@ -47,14 +71,12 @@ window.addEventListener('resize', () => {
   draw();
 });
 
-// Mouse wheel for zooming
 canvas.addEventListener('wheel', (e) => {
   e.preventDefault();
   const zoomFactor = 1.1;
   const mouseX = e.offsetX;
   const mouseY = e.offsetY;
 
-  // Convert mouse position to world coordinates
   const wx = (mouseX - offsetX) / zoom;
   const wy = (mouseY - offsetY) / zoom;
 
@@ -64,14 +86,12 @@ canvas.addEventListener('wheel', (e) => {
     zoom /= zoomFactor;
   }
 
-  // Adjust offset so zoom is centered around mouse position
   offsetX = mouseX - wx * zoom;
   offsetY = mouseY - wy * zoom;
 
   draw();
 });
 
-// Drag to pan
 canvas.addEventListener('mousedown', (e) => {
   isDragging = true;
   dragStart.x = e.clientX;
@@ -90,15 +110,18 @@ canvas.addEventListener('mousemove', (e) => {
   }
 });
 
-canvas.addEventListener('mouseup', () => {
-  isDragging = false;
-});
-canvas.addEventListener('mouseleave', () => {
-  isDragging = false;
+canvas.addEventListener('mouseup', () => isDragging = false);
+canvas.addEventListener('mouseleave', () => isDragging = false);
+
+input.addEventListener('input', () => {
+  let val = parseInt(input.value);
+  if (!isNaN(val) && val >= 3 && val <= 10000) {
+    sides = val;
+    draw();
+  }
 });
 
-// Draw the chiliagon
-function drawChiliagon(centerX, centerY, radius, sides) {
+function drawPolygon(centerX, centerY, radius, sides) {
   ctx.beginPath();
   for (let i = 0; i <= sides; i++) {
     const angle = (i / sides) * 2 * Math.PI;
@@ -109,7 +132,7 @@ function drawChiliagon(centerX, centerY, radius, sides) {
   }
   ctx.closePath();
   ctx.strokeStyle = '#00ff88';
-  ctx.lineWidth = 1 / zoom; // Keep line width consistent across zoom levels
+  ctx.lineWidth = 1 / zoom;
   ctx.stroke();
 }
 
@@ -118,7 +141,7 @@ function draw() {
   ctx.save();
   ctx.translate(offsetX, offsetY);
   ctx.scale(zoom, zoom);
-  drawChiliagon(0, 0, 200, 1000);
+  drawPolygon(0, 0, 200, sides);
   ctx.restore();
 }
 
