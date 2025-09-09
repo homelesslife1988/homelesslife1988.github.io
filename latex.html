@@ -84,16 +84,7 @@
         <p>Type LaTeX below to see your equation rendered:</p>
 
         <!-- Textarea for input -->
-        <textarea id="latexInput" placeholder="Type LaTeX code here..."></textarea>
-
-        <!-- Output container for rendered LaTeX -->
-        <div id="output"></div>
-
-        <!-- Button to save as PDF -->
-        <button id="pdfButton">Save as PDF</button>
-    </div>
-    <script>
-        window.latexExample = `
+        <textarea id="latexInput" placeholder="Type LaTeX code here...">
 Let \( f(x) \) be a continuous function on \( [a, b] \), and let \( g(x) \) be a differentiable function on \( [a, b] \). Consider the following series:
 
 \[
@@ -159,12 +150,18 @@ Finally, we conclude the proof by noting that the matrix sum converges and that 
 I = \sum_{n=1}^{\infty} \left( \int_a^b f(x) g_n(x) \, dx \right),
 \]
 as required.
-`;
-    </script>
+
+        </textarea>
+
+        <!-- Output container for rendered LaTeX -->
+        <div id="output"></div>
+
+        <!-- Button to save as PDF -->
+        <button id="pdfButton">Save as PDF</button>
+    </div>
     <script>
         // Check if MathJax is fully loaded before proceeding
         window.onload = function() {
-            document.getElementById('latexInput').value = window.latexExample;
             if (typeof MathJax !== "undefined") {
                 // MathJax is loaded and ready
                 console.log("MathJax loaded successfully");
